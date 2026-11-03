@@ -1,0 +1,13 @@
+<resources>
+    <style name="Theme.Blurrer" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorOnPrimary">@color/on_accent</item>
+        <item name="colorSecondaryContainer">@color/accent_soft</item>
+        <item name="colorOnSecondaryContainer">@color/accent</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="colorOnBackground">@color/ink</item>
+        <item name="android:windowBackground">@color/bg</item>
+    </style>
+</resources>

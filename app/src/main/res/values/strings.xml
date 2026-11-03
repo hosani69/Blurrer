@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Blurrer</string>
+    <string name="tagline">Every face is found and blurred automatically, right on your phone.</string>
+    <string name="private_badge">● Photos stay on this device</string>
+    <string name="take_photo">Take photo</string>
+    <string name="upload_photos">Choose photos</string>
+    <string name="empty_title">Add a photo to start</string>
+    <string name="empty_body">Take a photo or choose some from your gallery. Faces are blurred as soon as each photo loads.</string>
+    <string name="hint">Missed one? Drag a box over it. Tap a blurred face to unblur it.</string>
+    <string name="style">Style</string>
+    <string name="style_blur">Blur</string>
+    <string name="style_pixel">Pixelate</string>
+    <string name="style_solid">Solid</string>
+    <string name="strength">Strength</string>
+    <string name="detection">Detection</string>
+    <string name="outlines">Show face outlines</string>
+    <string name="save">Save</string>
+    <string name="save_all">Save all</string>
+    <string name="share">Share</string>
+</resources>

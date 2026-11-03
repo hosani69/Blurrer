@@ -1,0 +1,12 @@
+<resources>
+    <color name="accent">#2D48C9</color>
+    <color name="on_accent">#FFFFFF</color>
+    <color name="accent_soft">#E3E8FB</color>
+    <color name="bg">#EEF0F3</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="ink">#15181E</color>
+    <color name="muted">#5B6270</color>
+    <color name="ok">#1F7A4D</color>
+    <color name="stage">#1B1E25</color>
+    <color name="launcher_bg">#2D48C9</color>
+</resources>
