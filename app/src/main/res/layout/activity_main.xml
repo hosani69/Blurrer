@@ -46,32 +46,6 @@
             android:textColor="@color/muted"
             android:textSize="14sp" />
 
-        <!-- Add photos -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/takePhoto"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:text="@string/take_photo"
-                app:cornerRadius="12dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/choosePhotos"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:text="@string/upload_photos"
-                app:cornerRadius="12dp" />
-        </LinearLayout>
-
         <!-- Photo stage -->
         <FrameLayout
             android:id="@+id/stage"
@@ -86,6 +60,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="Photo with blurred faces" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/clearAll"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/clear_all"
+                android:textSize="13sp"
+                android:visibility="gone"
+                app:cornerRadius="20dp" />
 
             <LinearLayout
                 android:id="@+id/empty"
@@ -178,6 +167,32 @@
                 android:orientation="horizontal" />
         </HorizontalScrollView>
 
+        <!-- Add photos -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/takePhoto"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/take_photo"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/choosePhotos"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="@string/upload_photos"
+                app:cornerRadius="12dp" />
+        </LinearLayout>
+
         <!-- Save / share -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -248,6 +263,14 @@
                     android:text="@string/style_blur" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/styleFaceless"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/style_faceless" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/stylePixel"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
@@ -262,15 +285,16 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/style_solid" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/styleFaceless"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/style_faceless" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <LinearLayout
+                android:id="@+id/solidColors"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:layout_width="match_parent"

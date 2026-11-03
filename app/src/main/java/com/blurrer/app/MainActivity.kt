@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private var renderJob: Job? = null
     private var busy = false
     private var pendingCameraUri: Uri? = null
+    private val queued = mutableListOf<Uri>()
 
     private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
         val uri = pendingCameraUri
@@ -84,7 +85,9 @@ class MainActivity : AppCompatActivity() {
         b.saveAll.setOnClickListener { saveAll() }
         b.share.setOnClickListener { shareCurrent() }
 
-        b.editor.onFacesChanged = { rerender() }
+        b.editor.onFacesChanged = { rerender(); updateClearButton() }
+        b.clearAll.setOnClickListener { clearOrFind() }
+        buildSolidSwatches()
 
         // Four styles share one row, so keep their padding tight on narrow phones.
         val pad = (4 * resources.displayMetrics.density).roundToInt()
@@ -104,7 +107,8 @@ class MainActivity : AppCompatActivity() {
                 else -> BlurStyle.BLUR
             }
             settings = settings.copy(style = style)
-            b.strength.isEnabled = style != BlurStyle.FACELESS
+            b.strength.isEnabled = style == BlurStyle.BLUR || style == BlurStyle.PIXEL
+            b.solidColors.visibility = if (style == BlurStyle.SOLID) View.VISIBLE else View.GONE
             rerender(all = true)
         }
         val strengthNames = arrayOf("", "Light", "Medium", "Strong", "Very strong", "Maximum")
@@ -137,11 +141,13 @@ class MainActivity : AppCompatActivity() {
     /** Photos shared into Blurrer from the gallery or another app. */
     private fun handleShareIntent(i: Intent?) {
         i ?: return
-        val uris = when (i.action) {
+        var uris = when (i.action) {
             Intent.ACTION_SEND -> listOfNotNull(IntentCompat.getParcelableExtra(i, Intent.EXTRA_STREAM, Uri::class.java))
             Intent.ACTION_SEND_MULTIPLE -> IntentCompat.getParcelableArrayListExtra(i, Intent.EXTRA_STREAM, Uri::class.java).orEmpty()
-            else -> emptyList()
+            else -> return
         }
+        // Some apps only put the photo in the clip data.
+        if (uris.isEmpty()) i.clipData?.let { c -> uris = (0 until c.itemCount).mapNotNull { c.getItemAt(it).uri } }
         if (uris.isNotEmpty()) {
             i.action = null
             addPhotos(uris)
@@ -164,7 +170,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addPhotos(uris: List<Uri>, cameraShot: Boolean = false) {
-        if (busy) { toast("Still working on the last photos. Try again in a moment."); return }
+        if (busy) { queued += uris; return }
         lifecycleScope.launch {
             setBusy(true, "Finding faces…")
             val firstNew = photos.size
@@ -222,6 +228,7 @@ class MainActivity : AppCompatActivity() {
             }
             setBusy(false)
             rerender(all = true)
+            updateClearButton()
         }
     }
 
@@ -234,6 +241,8 @@ class MainActivity : AppCompatActivity() {
         b.save.isEnabled = true
         b.share.isEnabled = true
         b.editor.photo = photos[i]
+        b.clearAll.visibility = View.VISIBLE
+        updateClearButton()
         markSelectedThumb()
         rerender()
     }
@@ -317,6 +326,77 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // ---------- clear all / find faces ----------
+
+    private fun updateClearButton() {
+        val p = photos.getOrNull(current) ?: return
+        b.clearAll.setText(if (p.faces.isEmpty()) R.string.find_faces else R.string.clear_all)
+    }
+
+    /** Removes every box on this photo; when there are none left, looks for faces again. */
+    private fun clearOrFind() {
+        val p = photos.getOrNull(current) ?: return
+        if (p.faces.isNotEmpty()) {
+            p.faces.clear()
+            b.editor.invalidate()
+            rerender(); updateClearButton()
+            return
+        }
+        if (busy) return
+        lifecycleScope.launch {
+            setBusy(true, "Finding faces…")
+            p.faces = withContext(Dispatchers.Default) { finder.find(p.bitmap, settings.detection) }
+            setBusy(false)
+            rerender(); updateClearButton()
+        }
+    }
+
+    // ---------- solid colour ----------
+
+    private val solidChoices = intArrayOf(
+        0xFF14161B.toInt(), 0xFFFFFFFF.toInt(), 0xFF8A8F98.toInt(), 0xFFD93025.toInt(),
+        0xFFF9AB00.toInt(), 0xFF188038.toInt(), 0xFF1A56DB.toInt(), 0xFF9334E6.toInt(),
+    )
+
+    private fun buildSolidSwatches() {
+        val d = resources.displayMetrics.density
+        b.solidColors.removeAllViews()
+        solidChoices.forEach { color ->
+            val v = View(this).apply {
+                layoutParams = android.widget.LinearLayout.LayoutParams((34 * d).toInt(), (34 * d).toInt()).apply {
+                    marginEnd = (10 * d).toInt()
+                }
+                contentDescription = "Solid colour"
+                setOnClickListener {
+                    settings = settings.copy(solidColor = color)
+                    paintSwatches()
+                    rerender(all = true)
+                }
+                tag = color
+            }
+            b.solidColors.addView(v)
+        }
+        paintSwatches()
+    }
+
+    private fun paintSwatches() {
+        val d = resources.displayMetrics.density
+        val ring = ContextCompat.getColor(this, R.color.accent)
+        val edge = ContextCompat.getColor(this, R.color.muted)
+        for (i in 0 until b.solidColors.childCount) {
+            val v = b.solidColors.getChildAt(i)
+            val color = v.tag as Int
+            val selected = color == settings.solidColor
+            v.background = android.graphics.drawable.GradientDrawable().apply {
+                shape = android.graphics.drawable.GradientDrawable.OVAL
+                setColor(color)
+                if (selected) setStroke((3 * d).toInt(), ring) else setStroke((1 * d).toInt(), edge)
+            }
+            v.scaleX = if (selected) 1.12f else 1f
+            v.scaleY = v.scaleX
+        }
+    }
+
     // ---------- saving and sharing ----------
 
     private suspend fun saveToGallery(p: Photo): Boolean = withContext(Dispatchers.IO) {
@@ -388,6 +468,10 @@ class MainActivity : AppCompatActivity() {
         b.takePhoto.isEnabled = !on
         b.choosePhotos.isEnabled = !on
         b.saveAll.isEnabled = !on
+        // Photos shared in while we were busy start as soon as we're free.
+        if (!on && queued.isNotEmpty()) b.root.post {
+            if (!busy && queued.isNotEmpty()) { val next = queued.toList(); queued.clear(); addPhotos(next) }
+        }
     }
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()

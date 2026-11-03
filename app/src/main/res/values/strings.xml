@@ -18,4 +18,6 @@
     <string name="save">Save</string>
     <string name="save_all">Save all</string>
     <string name="share">Share</string>
+    <string name="clear_all">Clear all</string>
+    <string name="find_faces">Find faces</string>
 </resources>

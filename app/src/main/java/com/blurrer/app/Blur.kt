@@ -22,6 +22,7 @@ data class Settings(
     val strength: Int = 4,      // 1..5
     val detection: Int = 2,     // 1..3
     val outlines: Boolean = false,
+    val solidColor: Int = Color.rgb(0x14, 0x16, 0x1b),
 )
 
 /** A face (or a box the user drew) in photo pixel coordinates. */
@@ -63,7 +64,7 @@ object Blur {
         val out = Bitmap.createBitmap(sw, sh, Bitmap.Config.ARGB_8888)
         val c = Canvas(out)
         if (s.style == BlurStyle.SOLID) {
-            c.drawColor(Color.rgb(0x14, 0x16, 0x1b))
+            c.drawColor(s.solidColor)
             return out to area
         }
         val level = s.strength.coerceIn(1, 5)
