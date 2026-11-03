@@ -86,14 +86,25 @@ class MainActivity : AppCompatActivity() {
 
         b.editor.onFacesChanged = { rerender() }
 
+        // Four styles share one row, so keep their padding tight on narrow phones.
+        val pad = (4 * resources.displayMetrics.density).roundToInt()
+        for (i in 0 until b.styleGroup.childCount) {
+            (b.styleGroup.getChildAt(i) as com.google.android.material.button.MaterialButton).apply {
+                setPadding(pad, paddingTop, pad, paddingBottom)
+                textSize = 13f
+                maxLines = 1
+            }
+        }
         b.styleGroup.addOnButtonCheckedListener { _, id, checked ->
             if (!checked) return@addOnButtonCheckedListener
             val style = when (id) {
                 R.id.stylePixel -> BlurStyle.PIXEL
                 R.id.styleSolid -> BlurStyle.SOLID
+                R.id.styleFaceless -> BlurStyle.FACELESS
                 else -> BlurStyle.BLUR
             }
             settings = settings.copy(style = style)
+            b.strength.isEnabled = style != BlurStyle.FACELESS
             rerender(all = true)
         }
         val strengthNames = arrayOf("", "Light", "Medium", "Strong", "Very strong", "Maximum")
